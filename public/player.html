@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HLS Demo</title>
+	<link rel="stylesheet" href="https://unpkg.com/plyr@3/dist/plyr.css">
+	<script src="/app.js"></script>
+  </head>
+  <body>
+	<div class="container">
+		<video controls crossorigin playsinline poster="https://bitdash-a.akamaihd.net/content/sintel/poster.png"></video>	
+		</div>
+		
+	<script src="https://unpkg.com/plyr@3"></script>
+	<script src="https://cdn.rawgit.com/video-dev/hls.js/18bb552/dist/hls.min.js"></script>
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ var params = window.location.hash.replace('#', '').split(';');
+	//player.html#HASH;0;360p;640x360
+	var infoHash = params[0];
+	var fileID = params[1];
+	var quality = params[2];
+	var size = params[3];
+	const source = '/api/torrent/'+infoHash+'/m3u8/'+fileID;
+	const video = document.querySelector('video');
+	
+	const player = new Plyr(video, {captions: {active: true, update: true, language: 'en'}});
+	
+	if (!Hls.isSupported()) {
+		video.src = source;
+	} else {
+		
+		const hls = new Hls();
+		hls.loadSource(source);
+		hls.attachMedia(video);
+		window.hls = hls;
+		
+		// Handle changing captions
+		player.on('languagechange', () => {
+			setTimeout(() => hls.subtitleTrack = player.currentTrack, 50);
+		});
+	}
+	
+	// Expose player so it can be used from the console
+	window.player = player;
+});
+</script>
+
+  </body>
+</html>
